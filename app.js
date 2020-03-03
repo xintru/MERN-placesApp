@@ -1,9 +1,11 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const mongoose = require('mongoose')
 
 const HttpError = require('./models/http-error')
 const placesRoutes = require('./routes/places')
 const usersRoutes = require('./routes/users')
+const { MONGODB_PATH } = require('./secrets/secrets')
 
 const app = express()
 
@@ -25,4 +27,7 @@ app.use((error, req, res, next) => {
     .json({ message: error.message || 'Something went wrong.' })
 })
 
-app.listen(5000)
+mongoose
+  .connect(MONGODB_PATH, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => app.listen(5000))
+  .catch(error => console.log(error))
