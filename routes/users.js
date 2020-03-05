@@ -4,7 +4,7 @@ const router = Router()
 
 const usersController = require('../controllers/users')
 
-// /api/users
+// /api/users/...
 
 router.get('/', usersController.getUsers)
 

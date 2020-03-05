@@ -23,7 +23,7 @@ exports.signup = async (req, res, next) => {
     )
   }
 
-  const { name, email, password, places } = req.body
+  const { name, email, password } = req.body
   let existingUser
   try {
     existingUser = await User.findOne({ email })
@@ -39,7 +39,7 @@ exports.signup = async (req, res, next) => {
     image:
       'https://aws-tiqets-cdn.imgix.net/images/content/1e74453a4d2c45f9becb39add27f2dff.jpg?auto=format&fit=crop&ixlib=python-1.1.2&q=25&s=b720cbf5ab86e1786ee7bd2a6b4f26be&w=400&h=320&dpr=2.625',
     password,
-    places,
+    places: [],
   })
   try {
     await createdUser.save()
