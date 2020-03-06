@@ -66,5 +66,5 @@ exports.login = async (req, res, next) => {
       )
     )
   }
-  res.json({ token: 'some dummy token' })
+  res.json({ user: existingUser.toObject({ getters: true }) })
 }

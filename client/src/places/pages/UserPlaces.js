@@ -1,40 +1,44 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import PlaceList from '../components/PlaceList'
 
-const DUMMY_PLACES = [
-  {
-    id: 'p1',
-    title: 'Empire State Building',
-    description: 'Some description',
-    imageUrl:
-      'https://aws-tiqets-cdn.imgix.net/images/content/1e74453a4d2c45f9becb39add27f2dff.jpg?auto=format&fit=crop&ixlib=python-1.1.2&q=25&s=b720cbf5ab86e1786ee7bd2a6b4f26be&w=400&h=320&dpr=2.625',
-    address: ' 20 W 34th St, New York, NY 10001',
-    location: {
-      lat: 40.7484405,
-      lng: -73.9856644,
-    },
-    creator: 'u1',
-  },
-  {
-    id: 'p2',
-    title: 'Empire State Building',
-    description: 'Some description',
-    imageUrl:
-      'https://aws-tiqets-cdn.imgix.net/images/content/1e74453a4d2c45f9becb39add27f2dff.jpg?auto=format&fit=crop&ixlib=python-1.1.2&q=25&s=b720cbf5ab86e1786ee7bd2a6b4f26be&w=400&h=320&dpr=2.625',
-    address: ' 20 W 34th St, New York, NY 10001',
-    location: {
-      lat: 40.7484405,
-      lng: -73.9856644,
-    },
-    creator: 'u2',
-  },
-]
+import PlaceList from '../components/PlaceList'
+import ErrorModal from '../../shared/components/UIElements/Modal/ErrorModal'
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner/LoadingSpinner'
+import useHttp from '../../shared/hooks/http-hook'
 
 const UserPlaces = () => {
+  const { isLoading, error, sendRequest, clearError } = useHttp()
+  const [loadedPlaces, setLoadedPlaces] = useState([])
   const { userId } = useParams()
-  const loadedPlaces = DUMMY_PLACES.filter(place => place.creator === userId)
-  return <PlaceList items={loadedPlaces} />
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const responseData = await sendRequest(`/api/places/user/${userId}`)
+        setLoadedPlaces(responseData.places)
+      } catch (error) {}
+    })()
+  }, [sendRequest, userId])
+
+  const placeDeletedHandler = deletedPlaceId => {
+    setLoadedPlaces(prevPlaces =>
+      prevPlaces.filter(place => place.id !== deletedPlaceId)
+    )
+  }
+
+  return (
+    <>
+      <ErrorModal error={error} onClear={clearError} />
+      {isLoading && (
+        <div className="center">
+          <LoadingSpinner />
+        </div>
+      )}
+      {!isLoading && loadedPlaces && (
+        <PlaceList items={loadedPlaces} onDeletePlace={placeDeletedHandler} />
+      )}
+    </>
+  )
 }
 
 export default UserPlaces

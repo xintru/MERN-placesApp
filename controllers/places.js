@@ -31,11 +31,16 @@ exports.getPlacesByUserId = async (req, res, next) => {
     return next(new HttpError('Something went wrong', 500))
   }
 
-  if (!userWithPlaces || !userWithPlaces.places.length) {
+  if (!userWithPlaces) {
     return next(
       new HttpError('Could not find a place for the provided user id', 404)
     )
   }
+
+  if (!userWithPlaces.places.length) {
+    return res.status(200).json({ places: [] })
+  }
+
   res.status(200).json({
     places: userWithPlaces.places.map(place =>
       place.toObject({ getters: true })
