@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const fs = require('fs')
 const { validationResult } = require('express-validator')
 
 const HttpError = require('../models/http-error')
@@ -67,8 +68,7 @@ exports.createPlace = async (req, res, next) => {
     description,
     location: coordinates,
     address,
-    image:
-      'https://aws-tiqets-cdn.imgix.net/images/content/1e74453a4d2c45f9becb39add27f2dff.jpg?auto=format&fit=crop&ixlib=python-1.1.2&q=25&s=b720cbf5ab86e1786ee7bd2a6b4f26be&w=400&h=320&dpr=2.625',
+    image: req.file.path,
     creator,
   })
   let user
@@ -144,6 +144,8 @@ exports.deletePlace = async (req, res, next) => {
     return next(new HttpError('Could not find the place for this id', 404))
   }
 
+  const imagePath = place.image
+
   try {
     const session = await mongoose.startSession()
     session.startTransaction({ session })
@@ -156,6 +158,10 @@ exports.deletePlace = async (req, res, next) => {
       new HttpError('Something went wrong, could not delete place.', 500)
     )
   }
+
+  fs.unlink(imagePath, error => {
+    console.log(error)
+  })
 
   res.status(200).json({ message: 'Deleted place' })
 }

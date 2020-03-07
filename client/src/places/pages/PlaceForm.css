@@ -8,3 +8,8 @@
   border-radius: 6px;
   background: white;
 }
+
+.place-form__button-container {
+  width: 100%;
+  text-align: center;
+}

@@ -62,10 +62,10 @@ const UpdatePlace = props => {
       await sendRequest(
         `/api/places/${placeId}`,
         'PATCH',
-        {
+        JSON.stringify({
           title: formState.inputs.title.value,
           description: formState.inputs.description.value,
-        },
+        }),
         {
           'Content-Type': 'application/json',
         }

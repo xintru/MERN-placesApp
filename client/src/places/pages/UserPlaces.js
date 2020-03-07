@@ -8,15 +8,20 @@ import useHttp from '../../shared/hooks/http-hook'
 
 const UserPlaces = () => {
   const { isLoading, error, sendRequest, clearError } = useHttp()
+  const [finishedLoading, setFinishedLoading] = useState(false)
   const [loadedPlaces, setLoadedPlaces] = useState([])
   const { userId } = useParams()
 
   useEffect(() => {
     ;(async () => {
       try {
+        setFinishedLoading(false)
         const responseData = await sendRequest(`/api/places/user/${userId}`)
         setLoadedPlaces(responseData.places)
-      } catch (error) {}
+        setFinishedLoading(true)
+      } catch (error) {
+        setFinishedLoading(true)
+      }
     })()
   }, [sendRequest, userId])
 
@@ -31,11 +36,15 @@ const UserPlaces = () => {
       <ErrorModal error={error} onClear={clearError} />
       {isLoading && (
         <div className="center">
-          <LoadingSpinner />
+          <LoadingSpinner asOverlay />
         </div>
       )}
       {!isLoading && loadedPlaces && (
-        <PlaceList items={loadedPlaces} onDeletePlace={placeDeletedHandler} />
+        <PlaceList
+          items={loadedPlaces}
+          onDeletePlace={placeDeletedHandler}
+          finishedLoading={finishedLoading}
+        />
       )}
     </>
   )

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react'
+import { Link } from 'react-router-dom'
 
-import './Button.css';
+import './Button.css'
 
 const Button = props => {
   if (props.href) {
@@ -13,7 +13,7 @@ const Button = props => {
       >
         {props.children}
       </a>
-    );
+    )
   }
   if (props.to) {
     return (
@@ -25,7 +25,7 @@ const Button = props => {
       >
         {props.children}
       </Link>
-    );
+    )
   }
   return (
     <button
@@ -37,7 +37,7 @@ const Button = props => {
     >
       {props.children}
     </button>
-  );
-};
+  )
+}
 
-export default Button;
+export default Button

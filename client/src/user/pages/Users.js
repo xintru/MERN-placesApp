@@ -7,14 +7,19 @@ import useHttp from '../../shared/hooks/http-hook'
 
 const Users = () => {
   const [loadedUsers, setLoadedUsers] = useState([])
+  const [finishedLoading, setFinishedLoading] = useState(false)
   const { isLoading, error, sendRequest, clearError } = useHttp()
 
   useEffect(() => {
     ;(async () => {
       try {
+        setFinishedLoading(false)
         const response = await sendRequest('/api/users')
         setLoadedUsers(response.users)
-      } catch (error) {}
+        setFinishedLoading(true)
+      } catch (error) {
+        setFinishedLoading(true)
+      }
     })()
   }, [sendRequest])
 
@@ -23,10 +28,12 @@ const Users = () => {
       {<ErrorModal error={error} onClear={clearError} />}
       {isLoading && (
         <div className="center">
-          <LoadingSpinner />
+          <LoadingSpinner asOverlay />
         </div>
       )}
-      {!isLoading && loadedUsers && <UsersList items={loadedUsers} />}
+      {!isLoading && loadedUsers && (
+        <UsersList items={loadedUsers} finishedLoading={finishedLoading} />
+      )}
     </>
   )
 }

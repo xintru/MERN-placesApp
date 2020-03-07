@@ -6,7 +6,7 @@ import Button from '../../shared/components/FormElements/Button/Button'
 import PlaceItem from './PlaceItem'
 
 const PlaceList = props => {
-  if (!props.items.length) {
+  if (!props.items.length && props.finishedLoading) {
     return (
       <div className="place-list center">
         <Card>

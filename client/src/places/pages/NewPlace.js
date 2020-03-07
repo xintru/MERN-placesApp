@@ -4,6 +4,7 @@ import Input from '../../shared/components/FormElements/Input/Input'
 import Button from '../../shared/components/FormElements/Button/Button'
 import ErrorModal from '../../shared/components/UIElements/Modal/ErrorModal'
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner/LoadingSpinner'
+import ImageUpload from '../../shared/components/FormElements/ImageUpload/ImageUpload'
 import {
   VALIDATOR_REQUIRE,
   VALIDATOR_MINLENGTH,
@@ -31,6 +32,10 @@ const NewPlace = props => {
         value: '',
         isValid: false,
       },
+      image: {
+        value: null,
+        isValid: false,
+      },
     },
     false
   )
@@ -38,19 +43,13 @@ const NewPlace = props => {
   const placeSubmitHandler = async event => {
     event.preventDefault()
     try {
-      await sendRequest(
-        '/api/places',
-        'POST',
-        {
-          title: formState.inputs.title.value,
-          description: formState.inputs.description.value,
-          address: formState.inputs.address.value,
-          creator: userId,
-        },
-        {
-          'Content-Type': 'application/json',
-        }
-      )
+      const formData = new FormData()
+      formData.append('title', formState.inputs.title.value)
+      formData.append('description', formState.inputs.description.value)
+      formData.append('address', formState.inputs.address.value)
+      formData.append('image', formState.inputs.image.value)
+      formData.append('creator', userId)
+      await sendRequest('/api/places', 'POST', formData)
       history.push('/')
     } catch (error) {}
   }
@@ -85,9 +84,17 @@ const NewPlace = props => {
           errorText="Please enter a valid address."
           onInput={inputHandler}
         />
-        <Button type="submit" disabled={!formState.isValid}>
-          Add Place
-        </Button>
+        <ImageUpload
+          id="image"
+          onInput={inputHandler}
+          errorText="Please provide an image."
+          center
+        />
+        <div className="place-form__button-container">
+          <Button type="submit" disabled={!formState.isValid}>
+            Add Place
+          </Button>
+        </div>
       </form>
     </>
   )

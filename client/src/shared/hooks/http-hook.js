@@ -14,7 +14,7 @@ const useHttp = () => {
       try {
         const response = await fetch(url, {
           method,
-          body: body ? JSON.stringify(body) : null,
+          body,
           headers,
           signal: httpAbortController.signal,
         })
