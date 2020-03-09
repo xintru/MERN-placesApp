@@ -16,7 +16,7 @@ import './PlaceForm.css'
 
 const NewPlace = props => {
   const history = useHistory()
-  const { userId } = useContext(AuthContext)
+  const { userId, token } = useContext(AuthContext)
   const { isLoading, error, sendRequest, clearError } = useHttp()
   const [formState, inputHandler] = useForm(
     {
@@ -49,7 +49,9 @@ const NewPlace = props => {
       formData.append('address', formState.inputs.address.value)
       formData.append('image', formState.inputs.image.value)
       formData.append('creator', userId)
-      await sendRequest('/api/places', 'POST', formData)
+      await sendRequest('/api/places', 'POST', formData, {
+        Authorization: 'Bearer ' + token,
+      })
       history.push('/')
     } catch (error) {}
   }

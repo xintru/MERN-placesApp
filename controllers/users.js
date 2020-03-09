@@ -1,6 +1,9 @@
 const { validationResult } = require('express-validator')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const HttpError = require('../models/http-error')
+const { JWT_PRIVATE_KEY } = require('../secrets/secrets')
 const User = require('../models/user')
 
 exports.getUsers = async (req, res, next) => {
@@ -34,11 +37,19 @@ exports.signup = async (req, res, next) => {
   if (existingUser) {
     return next(new HttpError('User already exists', 422))
   }
+
+  let hashedPassword
+  try {
+    hashedPassword = await bcrypt.hash(password, 12)
+  } catch (error) {
+    next(new HttpError('Could not create user, please try again.', 500))
+  }
+
   const createdUser = new User({
     name,
     email,
     image: req.file.path,
-    password,
+    password: hashedPassword,
     places: [],
   })
   try {
@@ -46,7 +57,21 @@ exports.signup = async (req, res, next) => {
   } catch (error) {
     return next(new HttpError('Signing up failed', 500))
   }
-  res.status(201).json({ user: createdUser.toObject({ getters: true }) })
+
+  let token
+  try {
+    token = await jwt.sign(
+      { userId: createdUser.id, email: createdUser.email },
+      JWT_PRIVATE_KEY,
+      { expiresIn: '1h' }
+    )
+  } catch (error) {
+    return next(new HttpError('Signing up failed', 500))
+  }
+
+  res
+    .status(201)
+    .json({ user: createdUser.id, email: createdUser.email, token })
 }
 
 exports.login = async (req, res, next) => {
@@ -58,13 +83,30 @@ exports.login = async (req, res, next) => {
     return next(new HttpError('Logging in failed', 404))
   }
 
-  if (!existingUser || existingUser.password !== password) {
-    return next(
-      new HttpError(
-        'Could not identify user, credentials seem to be wrong',
-        401
-      )
-    )
+  if (!existingUser) {
+    return next(new HttpError('Invalid email and/or password.', 403))
   }
-  res.json({ user: existingUser.toObject({ getters: true }) })
+
+  let isValidPassword = false
+  try {
+    isValidPassword = await bcrypt.compare(password, existingUser.password)
+  } catch (error) {
+    return next(new HttpError('Something went wrong', 500))
+  }
+  if (!isValidPassword) {
+    return next(new HttpError('Invalid email and/or password.', 403))
+  }
+
+  let token
+  try {
+    token = await jwt.sign(
+      { userId: existingUser.id, email: existingUser.email },
+      JWT_PRIVATE_KEY,
+      { expiresIn: '1h' }
+    )
+  } catch (error) {
+    return next(new HttpError('Logging in failed', 500))
+  }
+
+  res.json({ userId: existingUser.id, email: existingUser.email, token })
 }
